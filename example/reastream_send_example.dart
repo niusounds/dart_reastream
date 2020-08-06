@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:reastream/reastream.dart';
 
 void main() async {
   final reastream = await ReaStream.create(
+    identifier: 'default',
     remote: InternetAddress.loopbackIPv4,
   );
 
@@ -14,33 +14,9 @@ void main() async {
   );
 
   await for (final noteNumber in noteStream) {
-    reastream.send(MidiPacket(
-      identifier: 'default',
-      events: [
-        MidiEvent(
-            detune: 0,
-            flags: 0,
-            noteLength: 0,
-            noteOffVelocity: 0,
-            noteOffset: 0,
-            sampleFramesSinceLastEvent: 0,
-            data: Uint8List.fromList([0x90, noteNumber, 96])),
-      ],
-    ));
+    reastream.noteOn(noteNumber, 96);
     await Future.delayed(const Duration(milliseconds: 250));
-    reastream.send(MidiPacket(
-      identifier: 'default',
-      events: [
-        MidiEvent(
-            detune: 0,
-            flags: 0,
-            noteLength: 0,
-            noteOffVelocity: 0,
-            noteOffset: 0,
-            sampleFramesSinceLastEvent: 0,
-            data: Uint8List.fromList([0x80, noteNumber, 0])),
-      ],
-    ));
+    reastream.noteOff(noteNumber);
   }
 }
 
