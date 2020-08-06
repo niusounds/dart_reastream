@@ -8,8 +8,8 @@ import 'packet.dart';
 class ReaStream {
   ReaStream._({
     this.dataHandler,
-    PacketCodec codec,
-  }) : _codec = codec ?? PacketCodec();
+    this.codec,
+  });
 
   static Future<ReaStream> create({
     int port = 58710,
@@ -21,22 +21,22 @@ class ReaStream {
         remote: remote,
         port: port,
       ),
-      codec: codec,
+      codec: codec ?? PacketCodec(),
     );
   }
 
   final DataHandler dataHandler;
-  final PacketCodec _codec;
+  final PacketCodec codec;
 
   Stream<Packet> receive() async* {
     yield* dataHandler
         .receive()
-        .map((data) => _codec.decode(data))
+        .map((data) => codec.decode(data))
         .where((event) => event != null);
   }
 
   void send(Packet packet) {
-    final data = _codec.encode(packet);
+    final data = codec.encode(packet);
     dataHandler.send(data);
   }
 
